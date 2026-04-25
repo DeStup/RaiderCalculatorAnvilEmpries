@@ -592,7 +592,7 @@
                     <button id="clearGroupBtn" class="btn clear-btn">🗑️ clear all</button>
                 </div>
                 <div id="groupListContainer" class="group-list">
-                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ group is empty. select an object and click on a damage type, then press add.</div>
+                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ list is empty. select an structure and click on a damage type, then press add.</div>
                 </div>
                 <div class="group-totals" id="groupTotalsFooter">
                     <div style="font-weight: bold; margin-bottom: 8px;">Total required</div>
@@ -932,7 +932,7 @@
     function updateGroupUI() {
         groupCountSpan.innerText = raidGroup.length;
         if (raidGroup.length === 0) {
-            groupListContainer.innerHTML = `<div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ group is empty. add objects.</div>`;
+            groupListContainer.innerHTML = `<div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ list is empty. add structure.</div>`;
             damageBreakdownDiv.innerHTML = '<div style="color:#8f9bb3;">—</div>';
             return;
         }
