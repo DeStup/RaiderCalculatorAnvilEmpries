@@ -515,7 +515,7 @@
         { name: "Homestead Door Wall T2", hp: 150 }
     ];
     // Additional entry from CSV duplicate variant (300 HP)
-    rawStructureEntries.push({ name: "Homestead Door Wall T2 (Heavy)", hp: 300 });
+    rawStructureEntries.push({ name: "Homestead Door Wall T3", hp: 300 });
     
     // Damage ranges
     const TORCH_MIN_DMG = 3;
@@ -556,12 +556,12 @@
         if (lowerName.includes("beacon tower")) return "Icons/IconBeaconTower.png";
         if (lowerName.includes("fortress keep")) return "Icons/IconKeep.png";
         if (lowerName.includes("town center")) return "Icons/IconTownhall.png";
-        if (lowerName.includes("kepp/town wall")) return "Icons/IconWall.png";
+        if (lowerName.includes("kepp/town wall")) return "Icons/IconGridFoundation_gate.png";
         if (lowerName.includes("siege tower")) return "Icons/SiegeTowerIcon.png";
         if (lowerName.includes("heavy battering ram")) return "Icons/HeavyBatteringRamIcon.png";
         if (lowerName.includes("battering ram")) return "Icons/BatteringRamIcon.png";
         if (lowerName.includes("catapult")) return "Icons/CatapultIcon.png";
-        if (lowerName.includes("keep door hold wall")) return "Icons/IconGridFoundation_gate.png";
+        if (lowerName.includes("keep door hold wall")) return "Icons/IconGridFoundation_wall_Door.png";
         if (lowerName.includes("homestead door wall")) return "Icons/FamilyCenterWallDoorICon.png";
         return "Icons/IconWall.png";
     }
