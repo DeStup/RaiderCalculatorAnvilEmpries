@@ -643,6 +643,9 @@
     const filterGeneralBtn = document.getElementById('filterGeneralBtn');
     const filterVehicleBtn = document.getElementById('filterVehicleBtn');
 
+    // Все допустимые типы объектов для осадных орудий
+    const ALL_STRUCTURE_TYPES = ["family", "defense", "camp", "town", "general"];
+
     function parseCSV(csvText) {
         const lines = csvText.split(/\r?\n/);
         let objectsList = [];
@@ -680,17 +683,23 @@
                 const parts = rest.split(",");
                 const hp = parseInt(parts[0]);
                 let category = parts.length > 1 ? parts[1].trim() : "general";
-                if (category === "town/fortress") category = "town";
+                // normalise category
+                let normalizedCategory = category;
+                let displayType = category;
+                if (category === "town/fortress") {
+                    normalizedCategory = "town";
+                    displayType = "town/fortress";
+                }
                 if (!isNaN(hp)) {
-                    objectsList.push({ 
-                        name: name, 
-                        hp: hp, 
-                        type: category === "town" ? "town/fortress" : category,
-                        category: category,
-                        durability: "durable" 
+                    objectsList.push({
+                        name: name,
+                        hp: hp,
+                        type: displayType,
+                        category: normalizedCategory,
+                        durability: "durable"
                     });
                 }
-            } 
+            }
             else if (currentSection === "damage") {
                 const colonIndex = line.indexOf(":");
                 if (colonIndex === -1) continue;
@@ -699,7 +708,7 @@
                 const parts = rest.split(",");
                 const damageRange = parts[0];
                 const durabilityType = parts.length > 1 ? parts[1].trim() : "consumable";
-                
+
                 let min, max;
                 if (damageRange.includes("-")) {
                     const [minStr, maxStr] = damageRange.split("-");
@@ -708,19 +717,23 @@
                 } else {
                     min = max = parseInt(damageRange);
                 }
-                
+
                 if (!isNaN(min) && !isNaN(max)) {
                     let key = name.toLowerCase().replace(/\s+/g, '');
                     if (key === "ironbroadax") key = "broadax";
                     if (key === "batteringram") key = "batteringram";
                     if (key === "heavybatteringram") key = "heavyram";
-                    
-                    let allowedFor = ["family", "defense", "camp", "town", "general", "vehicle"];
-                    if (name === "Iron Broadax") allowedFor = ["vehicle"];
-                    if (name === "Battering Ram" || name === "Heavy Battering Ram" || name === "Catapult") {
-                        allowedFor = ["family", "defense", "camp", "town", "general"];
+
+                    let allowedFor = [...ALL_STRUCTURE_TYPES, "vehicle"]; // torch and oil for all
+
+                    if (name === "Iron Broadax") {
+                        allowedFor = ["vehicle"];
+                    } else if (name === "Battering Ram" || name === "Heavy Battering Ram" || name === "Catapult") {
+                        allowedFor = [...ALL_STRUCTURE_TYPES]; // все типы построек, НЕ vehicle
+                    } else {
+                        allowedFor = [...ALL_STRUCTURE_TYPES, "vehicle"];
                     }
-                    
+
                     damageMap[key] = {
                         min: min, max: max, name: name,
                         icon: getDamageIcon(name),
@@ -828,12 +841,12 @@
             const displayType = obj.category === 'town' ? 'town/fortress' : obj.category;
             selectedTypeBadge.innerText = displayType;
             selectedTypeBadge.className = `type-badge ${obj.category === 'town' ? 'town-fortress' : obj.category}`;
-            
-            const available = getAvailableDamageTypes(obj.type);
+
+            const available = getAvailableDamageTypes(obj.category);
             let html = "";
             for (let dmgKey of available) {
                 const dmg = damageTypes[dmgKey];
-                const range = getDamageRange(obj.hp, dmgKey, obj.type);
+                const range = getDamageRange(obj.hp, dmgKey, obj.category);
                 const isSelected = (selectedDamageTypeForAdd === dmgKey);
                 html += `<div class="req-item ${isSelected ? 'selected-damage' : ''}" data-damage-type="${dmgKey}">
                             <img src="${dmg.icon}" onerror="this.style.display='none'"> ${dmg.name}: ${formatRange(range)}
@@ -841,7 +854,7 @@
             }
             requiredItemsList.innerHTML = html;
             selectedIconPreview.src = getIconForObject(obj.name);
-            
+
             document.querySelectorAll('.req-item[data-damage-type]').forEach(el => {
                 el.addEventListener('click', (e) => {
                     selectedDamageTypeForAdd = el.getAttribute('data-damage-type');
@@ -854,20 +867,20 @@
     function renderObjectList() {
         const query = searchInput.value.trim().toLowerCase();
         let filtered = objects;
-        
+
         if (!activeFilters.has("all") && activeFilters.size > 0) {
             filtered = filtered.filter(obj => activeFilters.has(obj.category));
         }
-        
+
         if (query) {
             filtered = filtered.filter(o => o.name.toLowerCase().includes(query));
         }
-        
+
         if (filtered.length === 0) {
             listContainer.innerHTML = `<div style="padding: 1.5rem; text-align:center;">🔎 no matches</div>`;
             return;
         }
-        
+
         listContainer.innerHTML = filtered.map(obj => {
             const isSelected = (selectedObjectId === obj.id);
             const displayType = obj.category === 'town' ? 'town/fortress' : obj.category;
@@ -883,13 +896,13 @@
                         </div>
                     </div>`;
         }).join('');
-        
+
         document.querySelectorAll('.structure-item').forEach(el => {
             el.addEventListener('click', (e) => {
                 selectedObjectId = el.getAttribute('data-id');
                 const obj = objects.find(o => o.id === selectedObjectId);
                 if (obj) {
-                    const available = getAvailableDamageTypes(obj.type);
+                    const available = getAvailableDamageTypes(obj.category);
                     if (available.length && !available.includes(selectedDamageTypeForAdd)) {
                         selectedDamageTypeForAdd = available[0];
                     }
@@ -908,12 +921,12 @@
             damageBreakdownDiv.innerHTML = '<div style="color:#8f9bb3;">—</div>';
             return;
         }
-        
+
         let totals = {};
         for (let [key, dmg] of Object.entries(damageTypes)) {
             totals[key] = { min: 0, max: 0, name: dmg.name, icon: dmg.icon, durable: dmg.durable };
         }
-        
+
         const groupHtml = raidGroup.map((item, idx) => {
             totals[item.damageType].min += item.hitsMin;
             totals[item.damageType].max += item.hitsMax;
@@ -931,7 +944,7 @@
                     </div>`;
         }).join('');
         groupListContainer.innerHTML = groupHtml;
-        
+
         let breakdownHtml = '';
         for (let [key, data] of Object.entries(totals)) {
             if (data.min > 0 || data.max > 0) {
@@ -941,7 +954,7 @@
             }
         }
         damageBreakdownDiv.innerHTML = breakdownHtml || '<div style="color:#8f9bb3;">—</div>';
-        
+
         document.querySelectorAll('.remove-group-item').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 raidGroup.splice(parseInt(btn.getAttribute('data-index')), 1);
@@ -958,22 +971,22 @@
             alert("select a damage type first");
             return;
         }
-        const available = getAvailableDamageTypes(obj.type);
+        const available = getAvailableDamageTypes(obj.category);
         if (!available.includes(selectedDamageTypeForAdd)) {
             alert(`${damageTypes[selectedDamageTypeForAdd]?.name} cannot damage ${obj.type}s!`);
             return;
         }
-        const range = getDamageRange(obj.hp, selectedDamageTypeForAdd, obj.type);
-        raidGroup.push({ 
-            id: Date.now() + Math.random(), 
-            name: obj.name, 
-            hp: obj.hp, 
-            type: obj.type, 
+        const range = getDamageRange(obj.hp, selectedDamageTypeForAdd, obj.category);
+        raidGroup.push({
+            id: Date.now() + Math.random(),
+            name: obj.name,
+            hp: obj.hp,
+            type: obj.type,
             category: obj.category,
             durability: obj.durability,
-            damageType: selectedDamageTypeForAdd, 
-            hitsMin: range.min, 
-            hitsMax: range.max 
+            damageType: selectedDamageTypeForAdd,
+            hitsMin: range.min,
+            hitsMax: range.max
         });
         updateGroupUI();
     }
@@ -993,12 +1006,12 @@
         } else {
             filterAllBtn.classList.remove('active-all');
             filterAllBtn.classList.add('filter-all');
-            
+
             const filterMap = {
                 family: filterFamilyBtn, defense: filterDefenseBtn, camp: filterCampBtn,
                 town: filterTownBtn, general: filterGeneralBtn, vehicle: filterVehicleBtn
             };
-            
+
             for (const [category, btn] of Object.entries(filterMap)) {
                 if (activeFilters.has(category)) {
                     btn.classList.add(`active-${category}`);
@@ -1030,22 +1043,22 @@
         renderObjectList();
     }
 
-    function escapeHtml(str) { 
+    function escapeHtml(str) {
         if (!str) return "";
-        return str.replace(/[&<>]/g, function(m) { 
-            return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; 
-        }); 
+        return str.replace(/[&<>]/g, function(m) {
+            return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;';
+        });
     }
 
     async function initialize() {
         const loaded = await loadDataFromCSV();
         if (!loaded) return;
-        
+
         updateDamageToolsDisplay();
         renderObjectList();
-        if (objects.length) { 
+        if (objects.length) {
             selectedObjectId = objects[0].id;
-            const available = getAvailableDamageTypes(objects[0].type);
+            const available = getAvailableDamageTypes(objects[0].category);
             if (available.length) selectedDamageTypeForAdd = available[0];
             updateSelectedDisplay();
         }
