@@ -31,6 +31,18 @@ Keep Door Hold Wall T3: 300,town/fortress
 Homestead Door Wall T2: 150,family
 Homestead Door Wall T3: 300,family
 Temple: 720,general
+Resource Stockpile T1: 160,family
+Resource Stockpile T2: 360,family
+Resource Stockpile T3: 840,family
+Homestead Bridge Walkway: 300,family
+Homestead Corridor T1: 150,family
+Homestead Corridor T2: 300,family
+Caravan: 128,vehicle
+Resource Wagon: 200,vehicle
+Small Boat: 200,vehicle
+Hand Cart: 80,vehicle
+Scorpion: 50,vehicle
+Siege Ladder: 200,vehicle
 
 
 #Damage
