@@ -22,6 +22,10 @@ Fortress Keep T3: 2880,town/fortress
 Town Center: 2880,town/fortress
 Kepp/Town Wall T2: 800,town/fortress
 Kepp/Town Wall T3: 2160,town/fortress
+Keep Half Width Foundation T2: 200,town/fortress
+Keep Half Width Foundation T3: 500,town/fortress
+Keep Triangular Foundation T2: 400,town/fortress
+Keep Triangular Foundation T3: 600,town/fortress
 Siege Tower: 2875,vehicle
 Heavy Battering Ram: 800,vehicle
 Battering Ram: 460,vehicle
