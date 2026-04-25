@@ -1,36 +1,41 @@
-Updated:24/04/2026
+Updated:25/04/2026
+#object: hp,type
 #Structure
-Keystone T1: 300
-Keystone T2: 500
-Keystone T3: 800
-Homestead Square Wall T1: 100
-Homestead Square Wall T2: 150
-Homestead Square Bedrock T1: 125
-Homestead Square Bedrock T2: 250
-Makeshift Wall T1: 60
-Makeshift Wall T2: 300
-Makeshift Wall T3: 720
-Large Camp: 500
-Camp Palisade: 38
-Stockade: 50
-Small Camp: 25
-Beacon Tower: 100
-Fortress Keep T1: 512
-Fortress Keep T2: 2048
-Fortress Keep T3: 2880
-Town Center: 2880
-Kepp/Town Wall T2: 800
-Kepp/Town Wall T3: 2160
-Siege Tower: 2875
-Heavy Battering Ram: 800
-Battering Ram: 460
-Catapult: 315
-Keep Door Hold Wall T2: 150
-Keep Door Hold Wall T3: 300
-Homestead Door Wall T2: 150
-Homestead Door Wall T3: 300
+Keystone T1: 300,family
+Keystone T2: 500,family
+Keystone T3: 800,family
+Homestead Square Wall T1: 100,family
+Homestead Square Wall T2: 150,family
+Homestead Square Bedrock T1: 125,family
+Homestead Square Bedrock T2: 250,family
+Makeshift Wall T1: 60,defense 
+Makeshift Wall T2: 300,defense 
+Makeshift Wall T3: 720,defense 
+Large Camp: 500,camp
+Camp Palisade: 38,camp
+Stockade: 50,defense
+Small Camp: 25,camp
+Beacon Tower: 100,general
+Fortress Keep T1: 512,town/fortress
+Fortress Keep T2: 2048,town/fortress
+Fortress Keep T3: 2880,town/fortress
+Town Center: 2880,town/fortress
+Kepp/Town Wall T2: 800,town/fortress
+Kepp/Town Wall T3: 2160,town/fortress
+Siege Tower: 2875,vehicle
+Heavy Battering Ram: 800,vehicle
+Battering Ram: 460,vehicle
+Catapult: 315,vehicle
+Keep Door Hold Wall T2: 150,town/fortress
+Keep Door Hold Wall T3: 300,town/fortress
+Homestead Door Wall T2: 150,family
+Homestead Door Wall T3: 300,family
 
 
 #Damage
-Torch: 3-4
-Oil Flask: 10-13
+Torch: 3-4,consumable
+Oil Flask: 10-13,consumable
+Iron Broadax: 25-30,durable
+Battering Ram: 150,durable
+Heavy Battering Ram: 75,durable
+Catapult: 45-55,durable

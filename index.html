@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anvil Empires - Raiding Calculator | deSharpe</title>
     <style>
         * {
@@ -119,8 +119,60 @@
             object-fit: contain;
         }
 
+        .filter-bar {
+            padding: 0.8rem 1.2rem;
+            background: #0c111a;
+            border-bottom: 1px solid #1f2a36;
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: #1b2533;
+            color: #6a7c94;
+            border: 1px solid transparent;
+            text-transform: lowercase;
+        }
+
+        .filter-btn.active-all {
+            background: #b87c2e;
+            color: #ffffff;
+            border-color: #ffd966;
+        }
+
+        .filter-btn:not(.active-all).filter-all {
+            background: #2a2a2a;
+            color: #5a5a6a;
+        }
+
+        .filter-btn.active-family { background: #3a8a4a; color: #ffffff; border-color: #6aba7a; }
+        .filter-btn.active-defense { background: #5a5aaa; color: #ffffff; border-color: #8a8acc; }
+        .filter-btn.active-camp { background: #aa7a3a; color: #ffffff; border-color: #daaa6a; }
+        .filter-btn.active-town { background: #7a4aaa; color: #ffffff; border-color: #aa7ada; }
+        .filter-btn.active-general { background: #4a8a8a; color: #ffffff; border-color: #7ababa; }
+        .filter-btn.active-vehicle { background: #aa4a4a; color: #ffffff; border-color: #da7a7a; }
+
+        .filter-btn.filter-family:not(.active-family) { background: #1a3a2a; color: #4a7a6a; }
+        .filter-btn.filter-defense:not(.active-defense) { background: #2a2a4a; color: #6a6aaa; }
+        .filter-btn.filter-camp:not(.active-camp) { background: #3a2a1a; color: #aa8a5a; }
+        .filter-btn.filter-town:not(.active-town) { background: #2a1a3a; color: #8a6aaa; }
+        .filter-btn.filter-general:not(.active-general) { background: #2a4a4a; color: #5aaaaa; }
+        .filter-btn.filter-vehicle:not(.active-vehicle) { background: #3a1a1a; color: #aa6a6a; }
+
+        .filter-btn:hover:not(.active-all):not(.active-family):not(.active-defense):not(.active-camp):not(.active-town):not(.active-general):not(.active-vehicle) {
+            background: #2a3444;
+            color: #b9c3db;
+        }
+
         .structure-list {
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
             padding: 0.5rem 0;
         }
@@ -170,13 +222,33 @@
         .structure-name {
             font-weight: 500;
             font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .structure-hp {
             font-size: 0.7rem;
             color: #b9c3db;
             font-family: monospace;
+            margin-top: 2px;
         }
+
+        .type-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 0;
+            opacity: 0.8;
+        }
+
+        .type-badge.family { background: #2a5a3a; color: #a8e6cf; }
+        .type-badge.defense { background: #3a3a6a; color: #aaaaff; }
+        .type-badge.camp { background: #5a3a2a; color: #ffcc88; }
+        .type-badge.town-fortress { background: #4a2a5a; color: #d4a8ff; }
+        .type-badge.general { background: #3a5a5a; color: #88dddd; }
+        .type-badge.vehicle { background: #5a2a2a; color: #ffaaaa; }
 
         .calculator-panel {
             flex: 1.2;
@@ -216,7 +288,6 @@
 
         .damage-stats {
             display: flex;
-            justify-content: space-between;
             flex-wrap: wrap;
             gap: 0.5rem;
             margin-top: 0.5rem;
@@ -226,7 +297,7 @@
             background: #18212e;
             padding: 0.3rem 0.8rem;
             border-radius: 24px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -256,24 +327,38 @@
         .req-list {
             margin-top: 0.7rem;
             display: flex;
-            gap: 1rem;
             flex-wrap: wrap;
+            gap: 0.8rem;
         }
 
-        .req-torch, .req-oil {
+        .req-item {
             background: #1b2533;
             border-radius: 32px;
             padding: 0.3rem 1rem;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            border: 1px solid transparent;
         }
 
-        .req-torch img, .req-oil img {
-            width: 22px;
-            height: 22px;
+        .req-item:hover {
+            background: #2a3a4a;
+            border-color: #e2b13b;
+        }
+
+        .req-item.selected-damage {
+            background: #b87c2e;
+            border-color: #ffd966;
+            box-shadow: 0 0 4px #ffb347;
+        }
+
+        .req-item img {
+            width: 20px;
+            height: 20px;
             object-fit: contain;
         }
 
@@ -302,11 +387,18 @@
             background: #d4912c;
         }
 
+        .clear-btn {
+            background: #2a2836;
+        }
+        .clear-btn:hover {
+            background: #3a3446;
+        }
+
         .group-list {
             background: #0c111a;
             border-radius: 24px;
             padding: 0.2rem 0;
-            max-height: 260px;
+            max-height: 280px;
             overflow-y: auto;
         }
 
@@ -317,6 +409,24 @@
             padding: 0.7rem 0.9rem;
             border-bottom: 1px solid #21303f;
             font-size: 0.85rem;
+        }
+
+        .group-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .group-item-name {
+            font-weight: 500;
+        }
+
+        .group-item-damage {
+            font-size: 0.7rem;
+            color: #e2b13b;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .group-item button {
@@ -340,16 +450,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        hr {
-            border-color: #2a3444;
-            margin: 0.2rem 0;
-        }
-
-        .clear-btn {
-            background: #2a2836;
-            margin-left: 0.5rem;
         }
 
         .search-highlight {
@@ -386,6 +486,43 @@
         .total-value {
             font-weight: 600;
             color: #e2b13b;
+            font-size: 1.1rem;
+        }
+        .total-breakdown {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #2a3444;
+            font-size: 0.8rem;
+        }
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+        .group-header-section {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .group-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .group-count {
+            font-size: 0.75rem;
+            color: #8f9bb3;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #8f9bb3;
+        }
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #ff6b6b;
         }
     </style>
 </head>
@@ -394,156 +531,256 @@
     <div class="header">
         <div>
             <h1>⚔️ ANVIL EMPIRES · RAID CALCULATOR</h1>
-            <div class="sub">Group planner</div>
+            <div class="sub"></div>
         </div>
         <div class="search-box">
             <span>🔍</span>
-            <input type="text" id="searchInput" placeholder="Search structures (wall, keep, camp...)" autocomplete="off">
+            <input type="text" id="searchInput" placeholder="search objects..." autocomplete="off">
         </div>
     </div>
 
     <div class="dashboard">
-        <!-- left panel: structures list with KEEP icon -->
         <div class="structures-panel">
             <div class="panel-header">
                 <span>
                     <img src="Icons/IconKeep.png" alt="keep" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23c68e3a%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2L3 7v10l9 5 9-5V7z%22/%3E%3C/svg%3E'">
-                    STRUCTURES
+                    objects
                 </span>
-                <span style="font-size:0.7rem;">HP · click to select</span>
+                <span style="font-size:0.7rem;">click to select</span>
+            </div>
+            <div class="filter-bar">
+                <button class="filter-btn filter-all active-all" id="filterAllBtn">all</button>
+                <button class="filter-btn filter-family" id="filterFamilyBtn">family</button>
+                <button class="filter-btn filter-defense" id="filterDefenseBtn">defense</button>
+                <button class="filter-btn filter-camp" id="filterCampBtn">camp</button>
+                <button class="filter-btn filter-town" id="filterTownBtn">town/fortress</button>
+                <button class="filter-btn filter-general" id="filterGeneralBtn">general</button>
+                <button class="filter-btn filter-vehicle" id="filterVehicleBtn">vehicle</button>
             </div>
             <div id="structureListContainer" class="structure-list">
-                <div style="padding: 1rem; text-align:center;">Loading structures...</div>
+                <div class="loading">loading data from datawiki.csv...</div>
             </div>
         </div>
 
-        <!-- right panel: details & raid group -->
         <div class="calculator-panel">
             <div class="damage-card">
                 <div class="damage-title">
                     <img src="Icons/32px-IconDamageTypeSiege.webp" alt="siege" onerror="this.style.display='none'">
-                    <span>DAMAGE TOOLS</span>
+                    <span>damage tools</span>
                 </div>
-                <div class="damage-stats">
-                    <div class="stat-badge"><img src="Icons/IconTorch.png" alt="torch" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23e3b341%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2L15 8H9L12 2Z%22/%3E%3C/svg%3E'"> Torch: 3–4 damage</div>
-                    <div class="stat-badge"><img src="Icons/IconOilFlask.png" alt="oil" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23a5d6ff%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M7 6L9 2H15L17 6L19 16H5L7 6Z%22/%3E%3C/svg%3E'"> Oil Flask: 10–13 damage</div>
+                <div class="damage-stats" id="damageStatsContainer">
+                    <div class="loading">loading...</div>
                 </div>
-                <div style="font-size:0.7rem; margin-top: 0.5rem; color:#b9cadd;">* Min/Max hits based on damage range (best/worst case).</div>
             </div>
 
-            <!-- selected structure preview -->
             <div class="selected-struct" id="selectedPreviewArea">
                 <div class="selected-name">
                     <img id="selectedIconPreview" src="Icons/IconTorch.png" width="28" height="28" style="background:#1e2a3a; border-radius:8px; padding:2px;">
                     <span id="selectedStructureName">—</span>
+                    <span id="selectedTypeBadge" class="type-badge"></span>
                 </div>
                 <div id="selectedHpDisplay" style="font-size:0.8rem; margin: 4px 0;">HP: —</div>
-                <div class="req-list" id="requiredItemsList">
-                    <div class="req-torch" id="torchReqDisplay"><img src="Icons/IconTorch.png" onerror="this.style.display='none'"> Torches: —</div>
-                    <div class="req-oil" id="oilReqDisplay"><img src="Icons/IconOilFlask.png" onerror="this.style.display='none'"> Oil Flasks: —</div>
-                </div>
+                <div class="req-list" id="requiredItemsList"></div>
                 <div class="add-group">
-                    <button id="addToGroupBtn" class="btn btn-primary">➕ ADD to raid group</button>
+                    <button id="addToGroupBtn" class="btn btn-primary">add to planner</button>
                 </div>
             </div>
 
-            <!-- raid group builder: group list first, then totals UNDER the list -->
             <div style="margin-top: 8px;">
-                <div class="flex-between" style="margin-bottom: 8px;">
-                    <span>📦 RAID GROUP · <span id="groupCount">0</span> structures</span>
-                    <button id="clearGroupBtn" class="btn clear-btn">🗑️ Clear all</button>
+                <div class="group-header-section">
+                    <div class="group-title">Planner</div>
+                    <div class="group-count"><span id="groupCount">0</span> objects</div>
+                    <button id="clearGroupBtn" class="btn clear-btn">🗑️ clear all</button>
                 </div>
-                
-                <!-- Group items list (appears first) -->
                 <div id="groupListContainer" class="group-list">
-                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ Group is empty. Add structures.</div>
+                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ group is empty. select an object and click on a damage type, then press add.</div>
                 </div>
-                
-                <!-- TOTAL SUMMARY (placed UNDER the list) -->
                 <div class="group-totals" id="groupTotalsFooter">
-                    <div class="flex-between" style="margin-bottom: 8px;">
-                        <span><img src="Icons/IconTorch.png" style="width:18px; height:18px; vertical-align:middle; margin-right:6px;"> Torches total:</span>
-                        <span class="total-value" id="totalTorchesGroup">0</span>
-                    </div>
-                    <div class="flex-between">
-                        <span><img src="Icons/IconOilFlask.png" style="width:18px; height:18px; vertical-align:middle; margin-right:6px;"> Oil Flasks total:</span>
-                        <span class="total-value" id="totalOilGroup">0</span>
+                    <div style="font-weight: bold; margin-bottom: 8px;">Total required</div>
+                    <div id="totalSummaryContainer">
+                        <div id="damageBreakdown" class="total-breakdown"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="patch-note">
-        <span>📅 Updated: 24/04/2026</span>
-        <span>✍️ Author: deSharpe</span>
-        <span>📚 <a href="https://anvilempires.wiki.gg/" target="_blank" rel="noopener noreferrer">anvilempires.wiki.gg</a></span>
+        <span>📅 updated: --</span>
+        <span>✍️ author: desharpe</span>
+        <span>📚 <a href="https://anvilempires.wiki.gg/" target="_blank">anvilempires.wiki.gg</a></span>
     </div>
 </div>
 
 <script>
-    // --------------------------------------------------------------
-    // STRUCTURE DATA (sourced from datawiki.csv)
-    // --------------------------------------------------------------
-    const rawStructureEntries = [
-        { name: "Keystone T1", hp: 300 },
-        { name: "Keystone T2", hp: 500 },
-        { name: "Keystone T3", hp: 800 },
-        { name: "Homestead Square Wall T1", hp: 100 },
-        { name: "Homestead Square Wall T2", hp: 150 },
-        { name: "Homestead Square Bedrock T1", hp: 125 },
-        { name: "Homestead Square Bedrock T2", hp: 250 },
-        { name: "Makeshift Wall T1", hp: 60 },
-        { name: "Makeshift Wall T2", hp: 300 },
-        { name: "Makeshift Wall T3", hp: 720 },
-        { name: "Large Camp", hp: 500 },
-        { name: "Camp Palisade", hp: 38 },
-        { name: "Stockade", hp: 50 },
-        { name: "Small Camp", hp: 25 },
-        { name: "Beacon Tower", hp: 100 },
-        { name: "Fortress Keep T1", hp: 512 },
-        { name: "Fortress Keep T2", hp: 2048 },
-        { name: "Fortress Keep T3", hp: 2880 },
-        { name: "Town Center", hp: 2880 },
-        { name: "Kepp/Town Wall T2", hp: 800 },
-        { name: "Kepp/Town Wall T3", hp: 2160 },
-        { name: "Siege Tower", hp: 2875 },
-        { name: "Heavy Battering Ram", hp: 800 },
-        { name: "Battering Ram", hp: 460 },
-        { name: "Catapult", hp: 315 },
-        { name: "Keep Door Hold Wall T2", hp: 150 },
-        { name: "Keep Door Hold Wall T3", hp: 300 },
-        { name: "Homestead Door Wall T2", hp: 150 }
-    ];
-    // Additional entry from CSV duplicate variant (300 HP)
-    rawStructureEntries.push({ name: "Homestead Door Wall T3", hp: 300 });
-    
-    // Damage ranges
-    const TORCH_MIN_DMG = 3;
-    const TORCH_MAX_DMG = 4;
-    const OIL_MIN_DMG = 10;
-    const OIL_MAX_DMG = 13;
-    
-    // Calculate min hits (using max damage) and max hits (using min damage)
-    function getTorchRange(hp) {
-        const minHits = Math.ceil(hp / TORCH_MAX_DMG);
-        const maxHits = Math.ceil(hp / TORCH_MIN_DMG);
+    let objects = [];
+    let damageTypes = {};
+    let selectedObjectId = null;
+    let selectedDamageTypeForAdd = null;
+    let raidGroup = [];
+    let activeFilters = new Set(["all"]);
+    let csvUpdateDate = "--";
+
+    const searchInput = document.getElementById('searchInput');
+    const listContainer = document.getElementById('structureListContainer');
+    const damageStatsContainer = document.getElementById('damageStatsContainer');
+    const selectedNameSpan = document.getElementById('selectedStructureName');
+    const selectedHpSpan = document.getElementById('selectedHpDisplay');
+    const selectedTypeBadge = document.getElementById('selectedTypeBadge');
+    const requiredItemsList = document.getElementById('requiredItemsList');
+    const selectedIconPreview = document.getElementById('selectedIconPreview');
+    const addToGroupBtn = document.getElementById('addToGroupBtn');
+    const clearGroupBtn = document.getElementById('clearGroupBtn');
+    const groupListContainer = document.getElementById('groupListContainer');
+    const damageBreakdownDiv = document.getElementById('damageBreakdown');
+    const groupCountSpan = document.getElementById('groupCount');
+    const patchNoteDate = document.querySelector('.patch-note span:first-child');
+
+    const filterAllBtn = document.getElementById('filterAllBtn');
+    const filterFamilyBtn = document.getElementById('filterFamilyBtn');
+    const filterDefenseBtn = document.getElementById('filterDefenseBtn');
+    const filterCampBtn = document.getElementById('filterCampBtn');
+    const filterTownBtn = document.getElementById('filterTownBtn');
+    const filterGeneralBtn = document.getElementById('filterGeneralBtn');
+    const filterVehicleBtn = document.getElementById('filterVehicleBtn');
+
+    function parseCSV(csvText) {
+        const lines = csvText.split(/\r?\n/);
+        let objectsList = [];
+        let damageMap = {};
+        let currentSection = null;
+        let updatedDate = null;
+
+        for (let line of lines) {
+            line = line.trim();
+            if (line === "") continue;
+
+            if (line.startsWith("Updated:")) {
+                updatedDate = line.replace("Updated:", "").trim();
+                csvUpdateDate = updatedDate;
+                if (patchNoteDate) patchNoteDate.innerText = `📅 updated: ${updatedDate}`;
+                continue;
+            }
+
+            if (line === "#Structure" || line.startsWith("#Structure")) {
+                currentSection = "structures";
+                continue;
+            }
+            if (line === "#Damage" || line.startsWith("#Damage")) {
+                currentSection = "damage";
+                continue;
+            }
+
+            if (line.startsWith("#") || line.startsWith("//")) continue;
+
+            if (currentSection === "structures") {
+                const colonIndex = line.indexOf(":");
+                if (colonIndex === -1) continue;
+                const name = line.substring(0, colonIndex).trim();
+                const rest = line.substring(colonIndex + 1).trim();
+                const parts = rest.split(",");
+                const hp = parseInt(parts[0]);
+                let category = parts.length > 1 ? parts[1].trim() : "general";
+                if (category === "town/fortress") category = "town";
+                if (!isNaN(hp)) {
+                    objectsList.push({ 
+                        name: name, 
+                        hp: hp, 
+                        type: category === "town" ? "town/fortress" : category,
+                        category: category,
+                        durability: "durable" 
+                    });
+                }
+            } 
+            else if (currentSection === "damage") {
+                const colonIndex = line.indexOf(":");
+                if (colonIndex === -1) continue;
+                const name = line.substring(0, colonIndex).trim();
+                const rest = line.substring(colonIndex + 1).trim();
+                const parts = rest.split(",");
+                const damageRange = parts[0];
+                const durabilityType = parts.length > 1 ? parts[1].trim() : "consumable";
+                
+                let min, max;
+                if (damageRange.includes("-")) {
+                    const [minStr, maxStr] = damageRange.split("-");
+                    min = parseInt(minStr);
+                    max = parseInt(maxStr);
+                } else {
+                    min = max = parseInt(damageRange);
+                }
+                
+                if (!isNaN(min) && !isNaN(max)) {
+                    let key = name.toLowerCase().replace(/\s+/g, '');
+                    if (key === "ironbroadax") key = "broadax";
+                    if (key === "batteringram") key = "batteringram";
+                    if (key === "heavybatteringram") key = "heavyram";
+                    
+                    let allowedFor = ["family", "defense", "camp", "town", "general", "vehicle"];
+                    if (name === "Iron Broadax") allowedFor = ["vehicle"];
+                    if (name === "Battering Ram" || name === "Heavy Battering Ram" || name === "Catapult") {
+                        allowedFor = ["family", "defense", "camp", "town", "general"];
+                    }
+                    
+                    damageMap[key] = {
+                        min: min, max: max, name: name,
+                        icon: getDamageIcon(name),
+                        allowedFor: allowedFor,
+                        durable: durabilityType === "durable"
+                    };
+                }
+            }
+        }
+        return { objects: objectsList, damage: damageMap };
+    }
+
+    function getDamageIcon(damageName) {
+        const name = damageName.toLowerCase();
+        if (name.includes("torch")) return "Icons/IconTorch.png";
+        if (name.includes("oil")) return "Icons/IconOilFlask.png";
+        if (name.includes("broadax")) return "Icons/IconCombatAxe.png";
+        if (name.includes("battering ram") && !name.includes("heavy")) return "Icons/BatteringRamIcon.png";
+        if (name.includes("heavy battering ram")) return "Icons/HeavyBatteringRamIcon.png";
+        if (name.includes("catapult")) return "Icons/CatapultIcon.png";
+        return "Icons/IconTorch.png";
+    }
+
+    function loadDataFromCSV() {
+        return fetch('datawiki.csv')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.text();
+            })
+            .then(csvText => {
+                const parsed = parseCSV(csvText);
+                objects = parsed.objects.map((obj, idx) => ({ ...obj, id: `obj_${idx}` }));
+                damageTypes = parsed.damage;
+                selectedDamageTypeForAdd = Object.keys(damageTypes)[0] || "torch";
+                selectedObjectId = objects[0]?.id || null;
+                return true;
+            })
+            .catch(error => {
+                console.error('Error loading datawiki.csv:', error);
+                listContainer.innerHTML = `<div class="error">⚠️ failed to load datawiki.csv. make sure the file exists next to this page.</div>`;
+                damageStatsContainer.innerHTML = `<div class="error">⚠️ failed to load damage data.</div>`;
+                return false;
+            });
+    }
+
+    function getDamageRange(hp, damageTypeKey, objectType) {
+        const dmg = damageTypes[damageTypeKey];
+        if (!dmg) return { min: 0, max: 0 };
+        if (!dmg.allowedFor.includes(objectType)) return { min: 0, max: 0 };
+        const minHits = Math.ceil(hp / dmg.max);
+        const maxHits = Math.ceil(hp / dmg.min);
         return { min: minHits, max: maxHits };
     }
-    
-    function getOilRange(hp) {
-        const minHits = Math.ceil(hp / OIL_MAX_DMG);
-        const maxHits = Math.ceil(hp / OIL_MIN_DMG);
-        return { min: minHits, max: maxHits };
-    }
-    
-    // Format "min–max" (or just single number if equal)
+
     function formatRange(range) {
         if (range.min === range.max) return `${range.min}`;
         return `${range.min}–${range.max}`;
     }
-    
-    // Icon resolver based on structure name (matches Icons folder)
-    function getIconForStructure(name) {
+
+    function getIconForObject(name) {
         const lowerName = name.toLowerCase();
         if (lowerName.includes("keystone")) return "Icons/FamilyCenterKeystoneIcon.png";
         if (lowerName.includes("homestead square wall")) return "Icons/FamilyCenterWallSquareIcon.png";
@@ -565,197 +802,268 @@
         if (lowerName.includes("homestead door wall")) return "Icons/FamilyCenterWallDoorICon.png";
         return "Icons/IconWall.png";
     }
-    
-    // Build structures array with unique IDs
-    let structures = rawStructureEntries.map((s, idx) => ({
-        id: `struct_${idx}_${Date.now()}_${Math.random()}`,
-        name: s.name,
-        hp: s.hp
-    }));
-    
-    // UI State
-    let selectedStructureId = structures.length > 0 ? structures[0].id : null;
-    let raidGroup = [];   // { id, name, hp }
-    
-    // DOM elements
-    const searchInput = document.getElementById('searchInput');
-    const listContainer = document.getElementById('structureListContainer');
-    const selectedNameSpan = document.getElementById('selectedStructureName');
-    const selectedHpSpan = document.getElementById('selectedHpDisplay');
-    const torchReqDisplay = document.getElementById('torchReqDisplay');
-    const oilReqDisplay = document.getElementById('oilReqDisplay');
-    const selectedIconPreview = document.getElementById('selectedIconPreview');
-    const addToGroupBtn = document.getElementById('addToGroupBtn');
-    const clearGroupBtn = document.getElementById('clearGroupBtn');
-    const groupListContainer = document.getElementById('groupListContainer');
-    const totalTorchesGroupSpan = document.getElementById('totalTorchesGroup');
-    const totalOilGroupSpan = document.getElementById('totalOilGroup');
-    const groupCountSpan = document.getElementById('groupCount');
-    
+
+    function getAvailableDamageTypes(objType) {
+        const available = [];
+        for (const [key, dmg] of Object.entries(damageTypes)) {
+            if (dmg.allowedFor.includes(objType)) available.push(key);
+        }
+        return available;
+    }
+
+    function updateDamageToolsDisplay() {
+        let html = '';
+        for (const [key, dmg] of Object.entries(damageTypes)) {
+            const rangeStr = (dmg.min === dmg.max) ? `${dmg.min}` : `${dmg.min}–${dmg.max}`;
+            html += `<div class="stat-badge"><img src="${dmg.icon}" onerror="this.style.display='none'"> ${dmg.name}: ${rangeStr}</div>`;
+        }
+        damageStatsContainer.innerHTML = html;
+    }
+
     function updateSelectedDisplay() {
-        const struct = structures.find(s => s.id === selectedStructureId);
-        if (struct) {
-            selectedNameSpan.innerText = struct.name;
-            selectedHpSpan.innerText = `❤️ Hitpoints: ${struct.hp}`;
-            const torchRange = getTorchRange(struct.hp);
-            const oilRange = getOilRange(struct.hp);
-            torchReqDisplay.innerHTML = `<img src="Icons/IconTorch.png" onerror="this.style.display='none'"> Torches: ${formatRange(torchRange)}`;
-            oilReqDisplay.innerHTML = `<img src="Icons/IconOilFlask.png" onerror="this.style.display='none'"> Oil Flasks: ${formatRange(oilRange)}`;
-            selectedIconPreview.src = getIconForStructure(struct.name);
-            selectedIconPreview.onerror = () => { selectedIconPreview.src = "Icons/IconWall.png"; };
-        } else {
-            selectedNameSpan.innerText = "—";
-            selectedHpSpan.innerText = "HP: —";
-            torchReqDisplay.innerHTML = `<img src="Icons/IconTorch.png" onerror="this.style.display='none'"> Torches: —`;
-            oilReqDisplay.innerHTML = `<img src="Icons/IconOilFlask.png" onerror="this.style.display='none'"> Oil Flasks: —`;
-            selectedIconPreview.src = "Icons/IconTorch.png";
+        const obj = objects.find(o => o.id === selectedObjectId);
+        if (obj) {
+            selectedNameSpan.innerText = obj.name;
+            selectedHpSpan.innerText = `❤️ HP: ${obj.hp}`;
+            const displayType = obj.category === 'town' ? 'town/fortress' : obj.category;
+            selectedTypeBadge.innerText = displayType;
+            selectedTypeBadge.className = `type-badge ${obj.category === 'town' ? 'town-fortress' : obj.category}`;
+            
+            const available = getAvailableDamageTypes(obj.type);
+            let html = "";
+            for (let dmgKey of available) {
+                const dmg = damageTypes[dmgKey];
+                const range = getDamageRange(obj.hp, dmgKey, obj.type);
+                const isSelected = (selectedDamageTypeForAdd === dmgKey);
+                html += `<div class="req-item ${isSelected ? 'selected-damage' : ''}" data-damage-type="${dmgKey}">
+                            <img src="${dmg.icon}" onerror="this.style.display='none'"> ${dmg.name}: ${formatRange(range)}
+                         </div>`;
+            }
+            requiredItemsList.innerHTML = html;
+            selectedIconPreview.src = getIconForObject(obj.name);
+            
+            document.querySelectorAll('.req-item[data-damage-type]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    selectedDamageTypeForAdd = el.getAttribute('data-damage-type');
+                    updateSelectedDisplay();
+                });
+            });
         }
     }
-    
-    function renderStructureList() {
+
+    function renderObjectList() {
         const query = searchInput.value.trim().toLowerCase();
-        let filtered = structures;
-        if (query) {
-            filtered = structures.filter(s => s.name.toLowerCase().includes(query));
+        let filtered = objects;
+        
+        if (!activeFilters.has("all") && activeFilters.size > 0) {
+            filtered = filtered.filter(obj => activeFilters.has(obj.category));
         }
+        
+        if (query) {
+            filtered = filtered.filter(o => o.name.toLowerCase().includes(query));
+        }
+        
         if (filtered.length === 0) {
-            listContainer.innerHTML = `<div style="padding: 1.5rem; text-align:center; color:#a3b3ce;">🔎 No structures match "${escapeHtml(query)}"</div>`;
+            listContainer.innerHTML = `<div style="padding: 1.5rem; text-align:center;">🔎 no matches</div>`;
             return;
         }
-        listContainer.innerHTML = filtered.map(struct => {
-            const isSelected = (selectedStructureId === struct.id);
-            let displayName = struct.name;
-            if (query) {
-                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                displayName = struct.name.replace(regex, match => `<span class="search-highlight">${match}</span>`);
-            }
-            return `
-                <div class="structure-item ${isSelected ? 'selected' : ''}" data-id="${struct.id}">
-                    <div class="structure-icon">
-                        <img src="${getIconForStructure(struct.name)}" onerror="this.src='Icons/IconWall.png'" alt="icon">
-                    </div>
-                    <div class="structure-info">
-                        <div class="structure-name">${displayName}</div>
-                        <div class="structure-hp">❤️ HP: ${struct.hp}</div>
-                    </div>
-                </div>
-            `;
+        
+        listContainer.innerHTML = filtered.map(obj => {
+            const isSelected = (selectedObjectId === obj.id);
+            const displayType = obj.category === 'town' ? 'town/fortress' : obj.category;
+            const typeClass = obj.category === 'town' ? 'town-fortress' : obj.category;
+            return `<div class="structure-item ${isSelected ? 'selected' : ''}" data-id="${obj.id}">
+                        <div class="structure-icon"><img src="${getIconForObject(obj.name)}" onerror="this.src='Icons/IconWall.png'"></div>
+                        <div class="structure-info">
+                            <div class="structure-name">
+                                ${escapeHtml(obj.name)}
+                                <span class="type-badge ${typeClass}">${displayType}</span>
+                            </div>
+                            <div class="structure-hp">❤️ HP: ${obj.hp}</div>
+                        </div>
+                    </div>`;
         }).join('');
         
         document.querySelectorAll('.structure-item').forEach(el => {
             el.addEventListener('click', (e) => {
-                const id = el.getAttribute('data-id');
-                if (id) {
-                    selectedStructureId = id;
-                    updateSelectedDisplay();
-                    renderStructureList();
+                selectedObjectId = el.getAttribute('data-id');
+                const obj = objects.find(o => o.id === selectedObjectId);
+                if (obj) {
+                    const available = getAvailableDamageTypes(obj.type);
+                    if (available.length && !available.includes(selectedDamageTypeForAdd)) {
+                        selectedDamageTypeForAdd = available[0];
+                    }
                 }
+                updateSelectedDisplay();
+                renderObjectList();
                 e.stopPropagation();
             });
         });
     }
-    
-    // Update group panel: totals appear UNDER the list
+
     function updateGroupUI() {
         groupCountSpan.innerText = raidGroup.length;
         if (raidGroup.length === 0) {
-            groupListContainer.innerHTML = `<div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ Group is empty. Add structures.</div>`;
-            totalTorchesGroupSpan.innerText = "0";
-            totalOilGroupSpan.innerText = "0";
+            groupListContainer.innerHTML = `<div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ group is empty. add objects.</div>`;
+            damageBreakdownDiv.innerHTML = '<div style="color:#8f9bb3;">—</div>';
             return;
         }
         
-        let totalTorchMin = 0, totalTorchMax = 0;
-        let totalOilMin = 0, totalOilMax = 0;
+        let totals = {};
+        for (let [key, dmg] of Object.entries(damageTypes)) {
+            totals[key] = { min: 0, max: 0, name: dmg.name, icon: dmg.icon, durable: dmg.durable };
+        }
         
         const groupHtml = raidGroup.map((item, idx) => {
-            const tRange = getTorchRange(item.hp);
-            const oRange = getOilRange(item.hp);
-            totalTorchMin += tRange.min;
-            totalTorchMax += tRange.max;
-            totalOilMin += oRange.min;
-            totalOilMax += oRange.max;
-            const torchStr = (tRange.min === tRange.max) ? `${tRange.min}` : `${tRange.min}–${tRange.max}`;
-            const oilStr = (oRange.min === oRange.max) ? `${oRange.min}` : `${oRange.min}–${oRange.max}`;
-            return `
-                <div class="group-item">
-                    <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <img src="${getIconForStructure(item.name)}" width="24" height="24" style="background:#1e2937; border-radius:6px;" onerror="this.src='Icons/IconWall.png'">
-                        <span><strong>${escapeHtml(item.name)}</strong> (${item.hp} hp)</span>
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <span style="font-size:0.7rem;"><img src="Icons/IconTorch.png" style="width:14px;height:14px;"> ${torchStr}  <img src="Icons/IconOilFlask.png" style="width:14px;height:14px; margin-left:6px;"> ${oilStr}</span>
+            totals[item.damageType].min += item.hitsMin;
+            totals[item.damageType].max += item.hitsMax;
+            const dmg = damageTypes[item.damageType];
+            const rangeStr = (item.hitsMin === item.hitsMax) ? `${item.hitsMin}` : `${item.hitsMin}–${item.hitsMax}`;
+            const hitsWord = (dmg.durable) ? " hits" : "";
+            const displayType = item.category === 'town' ? 'town/fortress' : item.category;
+            const typeClass = item.category === 'town' ? 'town-fortress' : item.category;
+            return `<div class="group-item">
+                        <div class="group-item-info">
+                            <div class="group-item-name"><img src="${getIconForObject(item.name)}" width="20" height="20" style="vertical-align:middle; margin-right:6px;"> <strong>${escapeHtml(item.name)}</strong> <span class="type-badge ${typeClass}">${displayType}</span></div>
+                            <div class="group-item-damage"><img src="${dmg.icon}" style="width:14px;height:14px;"> ${dmg.name}: ${rangeStr}${hitsWord}</div>
+                        </div>
                         <button class="remove-group-item" data-index="${idx}">✖</button>
-                    </div>
-                </div>
-            `;
+                    </div>`;
         }).join('');
-        
         groupListContainer.innerHTML = groupHtml;
         
-        const torchDisplay = (totalTorchMin === totalTorchMax) ? `${totalTorchMin}` : `${totalTorchMin}–${totalTorchMax}`;
-        const oilDisplay = (totalOilMin === totalOilMax) ? `${totalOilMin}` : `${totalOilMin}–${totalOilMax}`;
-        
-        totalTorchesGroupSpan.innerHTML = torchDisplay;
-        totalOilGroupSpan.innerHTML = oilDisplay;
+        let breakdownHtml = '';
+        for (let [key, data] of Object.entries(totals)) {
+            if (data.min > 0 || data.max > 0) {
+                const rangeStr = (data.min === data.max) ? `${data.min}` : `${data.min}–${data.max}`;
+                const hitsWord = (data.durable) ? " hits" : "";
+                breakdownHtml += `<div class="breakdown-item"><span><img src="${data.icon}" style="width:16px;height:16px;margin-right:6px;"> ${data.name}:</span><span class="total-value" style="font-size:0.9rem;">${rangeStr}${hitsWord}</span></div>`;
+            }
+        }
+        damageBreakdownDiv.innerHTML = breakdownHtml || '<div style="color:#8f9bb3;">—</div>';
         
         document.querySelectorAll('.remove-group-item').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const idx = parseInt(btn.getAttribute('data-index'), 10);
-                if (!isNaN(idx)) {
-                    raidGroup.splice(idx, 1);
-                    updateGroupUI();
-                }
+                raidGroup.splice(parseInt(btn.getAttribute('data-index')), 1);
+                updateGroupUI();
                 e.stopPropagation();
             });
         });
     }
-    
+
     function addSelectedToGroup() {
-        if (!selectedStructureId) {
-            alert("Please select a structure first.");
+        const obj = objects.find(o => o.id === selectedObjectId);
+        if (!obj) { alert("select an object first"); return; }
+        if (!selectedDamageTypeForAdd || !damageTypes[selectedDamageTypeForAdd]) {
+            alert("select a damage type first");
             return;
         }
-        const struct = structures.find(s => s.id === selectedStructureId);
-        if (struct) {
-            raidGroup.push({ 
-                id: struct.id + "_" + Date.now() + "_" + Math.random(), 
-                name: struct.name, 
-                hp: struct.hp 
-            });
-            updateGroupUI();
-        } else {
-            alert("Structure not found");
+        const available = getAvailableDamageTypes(obj.type);
+        if (!available.includes(selectedDamageTypeForAdd)) {
+            alert(`${damageTypes[selectedDamageTypeForAdd]?.name} cannot damage ${obj.type}s!`);
+            return;
         }
+        const range = getDamageRange(obj.hp, selectedDamageTypeForAdd, obj.type);
+        raidGroup.push({ 
+            id: Date.now() + Math.random(), 
+            name: obj.name, 
+            hp: obj.hp, 
+            type: obj.type, 
+            category: obj.category,
+            durability: obj.durability,
+            damageType: selectedDamageTypeForAdd, 
+            hitsMin: range.min, 
+            hitsMax: range.max 
+        });
+        updateGroupUI();
     }
-    
+
     function clearGroup() {
         raidGroup = [];
         updateGroupUI();
     }
-    
-    function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+
+    function updateFilterButtons() {
+        if (activeFilters.has("all")) {
+            filterAllBtn.classList.add('active-all');
+            filterAllBtn.classList.remove('filter-all');
+            [filterFamilyBtn, filterDefenseBtn, filterCampBtn, filterTownBtn, filterGeneralBtn, filterVehicleBtn].forEach(btn => {
+                btn.classList.remove('active-family', 'active-defense', 'active-camp', 'active-town', 'active-general', 'active-vehicle');
+            });
+        } else {
+            filterAllBtn.classList.remove('active-all');
+            filterAllBtn.classList.add('filter-all');
+            
+            const filterMap = {
+                family: filterFamilyBtn, defense: filterDefenseBtn, camp: filterCampBtn,
+                town: filterTownBtn, general: filterGeneralBtn, vehicle: filterVehicleBtn
+            };
+            
+            for (const [category, btn] of Object.entries(filterMap)) {
+                if (activeFilters.has(category)) {
+                    btn.classList.add(`active-${category}`);
+                } else {
+                    btn.classList.remove(`active-${category}`);
+                }
+            }
+        }
     }
-    
-    function initialize() {
-        renderStructureList();
-        if (structures.length > 0) {
-            selectedStructureId = structures[0].id;
+
+    function toggleFilter(filter) {
+        if (filter === "all") {
+            activeFilters.clear();
+            activeFilters.add("all");
+        } else {
+            if (activeFilters.has("all")) {
+                activeFilters.delete("all");
+            }
+            if (activeFilters.has(filter)) {
+                activeFilters.delete(filter);
+                if (activeFilters.size === 0) {
+                    activeFilters.add("all");
+                }
+            } else {
+                activeFilters.add(filter);
+            }
+        }
+        updateFilterButtons();
+        renderObjectList();
+    }
+
+    function escapeHtml(str) { 
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function(m) { 
+            return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; 
+        }); 
+    }
+
+    async function initialize() {
+        const loaded = await loadDataFromCSV();
+        if (!loaded) return;
+        
+        updateDamageToolsDisplay();
+        renderObjectList();
+        if (objects.length) { 
+            selectedObjectId = objects[0].id;
+            const available = getAvailableDamageTypes(objects[0].type);
+            if (available.length) selectedDamageTypeForAdd = available[0];
             updateSelectedDisplay();
         }
-        addToGroupBtn.addEventListener('click', addSelectedToGroup);
-        clearGroupBtn.addEventListener('click', clearGroup);
-        searchInput.addEventListener('input', () => {
-            renderStructureList();
-        });
+        
+        addToGroupBtn.onclick = addSelectedToGroup;
+        clearGroupBtn.onclick = clearGroup;
+        searchInput.oninput = () => renderObjectList();
+        
+        filterAllBtn.onclick = () => toggleFilter("all");
+        filterFamilyBtn.onclick = () => toggleFilter("family");
+        filterDefenseBtn.onclick = () => toggleFilter("defense");
+        filterCampBtn.onclick = () => toggleFilter("camp");
+        filterTownBtn.onclick = () => toggleFilter("town");
+        filterGeneralBtn.onclick = () => toggleFilter("general");
+        filterVehicleBtn.onclick = () => toggleFilter("vehicle");
+        
         updateGroupUI();
+        updateFilterButtons();
     }
     
     initialize();
