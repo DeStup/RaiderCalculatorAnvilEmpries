@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Anvil Empires - Raiding Calculator | deSharpe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0f1c;
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, 'Inter', sans-serif;
+            color: #e9eef3;
+            padding: 1.5rem;
+        }
+
+        .app {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #2e3a48;
+            padding-bottom: 1.2rem;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #e6b86e, #c68e3a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 600;
+        }
+
+        .sub {
+            font-size: 0.85rem;
+            color: #8f9bb3;
+        }
+
+        .search-box {
+            background: #1e2436;
+            border-radius: 60px;
+            padding: 0.4rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid #334155;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f0f3fa;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            width: 220px;
+            font-weight: 400;
+        }
+
+        .search-box input::placeholder {
+            color: #6f7c91;
+        }
+
+        .search-box span {
+            color: #d4af6a;
+            font-size: 1.1rem;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .structures-panel {
+            flex: 2;
+            min-width: 280px;
+            background: #11161f;
+            border-radius: 28px;
+            border: 1px solid #293544;
+            overflow: hidden;
+            box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-header {
+            background: #0f131d;
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #2c3746;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-header img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .structure-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .structure-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.7rem 1.2rem;
+            border-bottom: 1px solid #1f2a36;
+            transition: background 0.1s ease;
+            cursor: pointer;
+        }
+
+        .structure-item.selected {
+            background: #243041;
+            border-left: 4px solid #e2b13b;
+            background: linear-gradient(90deg, #232d3f, #1a212f);
+        }
+
+        .structure-item:hover {
+            background: #1e2635;
+        }
+
+        .structure-icon {
+            width: 36px;
+            height: 36px;
+            background: #1e2937;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .structure-icon img {
+            max-width: 32px;
+            max-height: 32px;
+            object-fit: contain;
+        }
+
+        .structure-info {
+            flex: 1;
+        }
+
+        .structure-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .structure-hp {
+            font-size: 0.7rem;
+            color: #b9c3db;
+            font-family: monospace;
+        }
+
+        .calculator-panel {
+            flex: 1.2;
+            min-width: 280px;
+            background: #11161f;
+            border-radius: 28px;
+            border: 1px solid #293544;
+            padding: 1.2rem 1.3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .damage-card {
+            background: #0c111a;
+            border-radius: 20px;
+            padding: 1rem;
+            border: 1px solid #2f3b48;
+        }
+
+        .damage-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            border-left: 3px solid #e3b341;
+            padding-left: 0.7rem;
+        }
+
+        .damage-title img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .damage-stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-badge {
+            background: #18212e;
+            padding: 0.3rem 0.8rem;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-badge img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .selected-struct {
+            background: #0a0f17;
+            border-radius: 24px;
+            padding: 0.9rem 1rem;
+        }
+
+        .selected-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .req-list {
+            margin-top: 0.7rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .req-torch, .req-oil {
+            background: #1b2533;
+            border-radius: 32px;
+            padding: 0.3rem 1rem;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .req-torch img, .req-oil img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+        .add-group {
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        .btn {
+            background: #2f3e55;
+            border: none;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s linear;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background: #b87c2e;
+            box-shadow: 0 1px 3px black;
+        }
+        .btn-primary:hover {
+            background: #d4912c;
+        }
+
+        .group-list {
+            background: #0c111a;
+            border-radius: 24px;
+            padding: 0.2rem 0;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 0.9rem;
+            border-bottom: 1px solid #21303f;
+            font-size: 0.85rem;
+        }
+
+        .group-item button {
+            background: #3a2a24;
+            border: none;
+            padding: 0.2rem 0.6rem;
+            border-radius: 18px;
+            color: #ffbc6e;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .group-totals {
+            background: #1b2433;
+            border-radius: 20px;
+            padding: 0.8rem;
+            margin-top: 0.8rem;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        hr {
+            border-color: #2a3444;
+            margin: 0.2rem 0;
+        }
+
+        .clear-btn {
+            background: #2a2836;
+            margin-left: 0.5rem;
+        }
+
+        .search-highlight {
+            background-color: #ffffaa30;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0c1118;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5f6f87;
+            border-radius: 6px;
+        }
+        .patch-note {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 1.2rem;
+            color: #6a7c94;
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .patch-note a {
+            color: #d4af6a;
+            text-decoration: none;
+        }
+        .patch-note a:hover {
+            text-decoration: underline;
+        }
+        .total-value {
+            font-weight: 600;
+            color: #e2b13b;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div>
+            <h1>⚔️ ANVIL EMPIRES · RAID CALCULATOR</h1>
+            <div class="sub">Group planner</div>
+        </div>
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="Search structures (wall, keep, camp...)" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <!-- left panel: structures list with KEEP icon -->
+        <div class="structures-panel">
+            <div class="panel-header">
+                <span>
+                    <img src="Icons/IconKeep.png" alt="keep" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23c68e3a%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2L3 7v10l9 5 9-5V7z%22/%3E%3C/svg%3E'">
+                    STRUCTURES
+                </span>
+                <span style="font-size:0.7rem;">HP · click to select</span>
+            </div>
+            <div id="structureListContainer" class="structure-list">
+                <div style="padding: 1rem; text-align:center;">Loading structures...</div>
+            </div>
+        </div>
+
+        <!-- right panel: details & raid group -->
+        <div class="calculator-panel">
+            <div class="damage-card">
+                <div class="damage-title">
+                    <img src="Icons/32px-IconDamageTypeSiege.webp" alt="siege" onerror="this.style.display='none'">
+                    <span>DAMAGE TOOLS</span>
+                </div>
+                <div class="damage-stats">
+                    <div class="stat-badge"><img src="Icons/IconTorch.png" alt="torch" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23e3b341%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M12 2L15 8H9L12 2Z%22/%3E%3C/svg%3E'"> Torch: 3–4 damage</div>
+                    <div class="stat-badge"><img src="Icons/IconOilFlask.png" alt="oil" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22%23a5d6ff%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M7 6L9 2H15L17 6L19 16H5L7 6Z%22/%3E%3C/svg%3E'"> Oil Flask: 10–13 damage</div>
+                </div>
+                <div style="font-size:0.7rem; margin-top: 0.5rem; color:#b9cadd;">* Min/Max hits based on damage range (best/worst case).</div>
+            </div>
+
+            <!-- selected structure preview -->
+            <div class="selected-struct" id="selectedPreviewArea">
+                <div class="selected-name">
+                    <img id="selectedIconPreview" src="Icons/IconTorch.png" width="28" height="28" style="background:#1e2a3a; border-radius:8px; padding:2px;">
+                    <span id="selectedStructureName">—</span>
+                </div>
+                <div id="selectedHpDisplay" style="font-size:0.8rem; margin: 4px 0;">HP: —</div>
+                <div class="req-list" id="requiredItemsList">
+                    <div class="req-torch" id="torchReqDisplay"><img src="Icons/IconTorch.png" onerror="this.style.display='none'"> Torches: —</div>
+                    <div class="req-oil" id="oilReqDisplay"><img src="Icons/IconOilFlask.png" onerror="this.style.display='none'"> Oil Flasks: —</div>
+                </div>
+                <div class="add-group">
+                    <button id="addToGroupBtn" class="btn btn-primary">➕ ADD to raid group</button>
+                </div>
+            </div>
+
+            <!-- raid group builder: group list first, then totals UNDER the list -->
+            <div style="margin-top: 8px;">
+                <div class="flex-between" style="margin-bottom: 8px;">
+                    <span>📦 RAID GROUP · <span id="groupCount">0</span> structures</span>
+                    <button id="clearGroupBtn" class="btn clear-btn">🗑️ Clear all</button>
+                </div>
+                
+                <!-- Group items list (appears first) -->
+                <div id="groupListContainer" class="group-list">
+                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ Group is empty. Add structures.</div>
+                </div>
+                
+                <!-- TOTAL SUMMARY (placed UNDER the list) -->
+                <div class="group-totals" id="groupTotalsFooter">
+                    <div class="flex-between" style="margin-bottom: 8px;">
+                        <span><img src="Icons/IconTorch.png" style="width:18px; height:18px; vertical-align:middle; margin-right:6px;"> Torches total:</span>
+                        <span class="total-value" id="totalTorchesGroup">0</span>
+                    </div>
+                    <div class="flex-between">
+                        <span><img src="Icons/IconOilFlask.png" style="width:18px; height:18px; vertical-align:middle; margin-right:6px;"> Oil Flasks total:</span>
+                        <span class="total-value" id="totalOilGroup">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="patch-note">
+        <span>📅 Updated: 24/04/2026</span>
+        <span>✍️ Author: deSharpe</span>
+        <span>📚 <a href="https://anvilempires.wiki.gg/" target="_blank" rel="noopener noreferrer">anvilempires.wiki.gg</a></span>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // STRUCTURE DATA (sourced from datawiki.csv)
+    // --------------------------------------------------------------
+    const rawStructureEntries = [
+        { name: "Keystone T1", hp: 300 },
+        { name: "Keystone T2", hp: 500 },
+        { name: "Keystone T3", hp: 800 },
+        { name: "Homestead Square Wall T1", hp: 100 },
+        { name: "Homestead Square Wall T2", hp: 150 },
+        { name: "Homestead Square Bedrock T1", hp: 125 },
+        { name: "Homestead Square Bedrock T2", hp: 250 },
+        { name: "Makeshift Wall T1", hp: 60 },
+        { name: "Makeshift Wall T2", hp: 300 },
+        { name: "Makeshift Wall T3", hp: 720 },
+        { name: "Large Camp", hp: 500 },
+        { name: "Camp Palisade", hp: 38 },
+        { name: "Stockade", hp: 50 },
+        { name: "Small Camp", hp: 25 },
+        { name: "Beacon Tower", hp: 100 },
+        { name: "Fortress Keep T1", hp: 512 },
+        { name: "Fortress Keep T2", hp: 2048 },
+        { name: "Fortress Keep T3", hp: 2880 },
+        { name: "Town Center", hp: 2880 },
+        { name: "Kepp/Town Wall T2", hp: 800 },
+        { name: "Kepp/Town Wall T3", hp: 2160 },
+        { name: "Siege Tower", hp: 2875 },
+        { name: "Heavy Battering Ram", hp: 800 },
+        { name: "Battering Ram", hp: 460 },
+        { name: "Catapult", hp: 315 },
+        { name: "Keep Door Hold Wall T2", hp: 150 },
+        { name: "Keep Door Hold Wall T3", hp: 300 },
+        { name: "Homestead Door Wall T2", hp: 150 }
+    ];
+    // Additional entry from CSV duplicate variant (300 HP)
+    rawStructureEntries.push({ name: "Homestead Door Wall T2 (Heavy)", hp: 300 });
+    
+    // Damage ranges
+    const TORCH_MIN_DMG = 3;
+    const TORCH_MAX_DMG = 4;
+    const OIL_MIN_DMG = 10;
+    const OIL_MAX_DMG = 13;
+    
+    // Calculate min hits (using max damage) and max hits (using min damage)
+    function getTorchRange(hp) {
+        const minHits = Math.ceil(hp / TORCH_MAX_DMG);
+        const maxHits = Math.ceil(hp / TORCH_MIN_DMG);
+        return { min: minHits, max: maxHits };
+    }
+    
+    function getOilRange(hp) {
+        const minHits = Math.ceil(hp / OIL_MAX_DMG);
+        const maxHits = Math.ceil(hp / OIL_MIN_DMG);
+        return { min: minHits, max: maxHits };
+    }
+    
+    // Format "min–max" (or just single number if equal)
+    function formatRange(range) {
+        if (range.min === range.max) return `${range.min}`;
+        return `${range.min}–${range.max}`;
+    }
+    
+    // Icon resolver based on structure name (matches Icons folder)
+    function getIconForStructure(name) {
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes("keystone")) return "Icons/FamilyCenterKeystoneIcon.png";
+        if (lowerName.includes("homestead square wall")) return "Icons/FamilyCenterWallSquareIcon.png";
+        if (lowerName.includes("homestead square bedrock")) return "Icons/FamilyCenterWallSquareIcon.png";
+        if (lowerName.includes("makeshift wall")) return "Icons/IconWall.png";
+        if (lowerName.includes("large camp")) return "Icons/IconCamp.png";
+        if (lowerName.includes("camp palisade")) return "Icons/IconCampWall.png";
+        if (lowerName.includes("stockade")) return "Icons/IconCampStockade.png";
+        if (lowerName.includes("small camp")) return "Icons/IconCamp.png";
+        if (lowerName.includes("beacon tower")) return "Icons/IconBeaconTower.png";
+        if (lowerName.includes("fortress keep")) return "Icons/IconKeep.png";
+        if (lowerName.includes("town center")) return "Icons/IconTownhall.png";
+        if (lowerName.includes("kepp/town wall")) return "Icons/IconWall.png";
+        if (lowerName.includes("siege tower")) return "Icons/SiegeTowerIcon.png";
+        if (lowerName.includes("heavy battering ram")) return "Icons/HeavyBatteringRamIcon.png";
+        if (lowerName.includes("battering ram")) return "Icons/BatteringRamIcon.png";
+        if (lowerName.includes("catapult")) return "Icons/CatapultIcon.png";
+        if (lowerName.includes("keep door hold wall")) return "Icons/IconGridFoundation_gate.png";
+        if (lowerName.includes("homestead door wall")) return "Icons/FamilyCenterWallDoorICon.png";
+        return "Icons/IconWall.png";
+    }
+    
+    // Build structures array with unique IDs
+    let structures = rawStructureEntries.map((s, idx) => ({
+        id: `struct_${idx}_${Date.now()}_${Math.random()}`,
+        name: s.name,
+        hp: s.hp
+    }));
+    
+    // UI State
+    let selectedStructureId = structures.length > 0 ? structures[0].id : null;
+    let raidGroup = [];   // { id, name, hp }
+    
+    // DOM elements
+    const searchInput = document.getElementById('searchInput');
+    const listContainer = document.getElementById('structureListContainer');
+    const selectedNameSpan = document.getElementById('selectedStructureName');
+    const selectedHpSpan = document.getElementById('selectedHpDisplay');
+    const torchReqDisplay = document.getElementById('torchReqDisplay');
+    const oilReqDisplay = document.getElementById('oilReqDisplay');
+    const selectedIconPreview = document.getElementById('selectedIconPreview');
+    const addToGroupBtn = document.getElementById('addToGroupBtn');
+    const clearGroupBtn = document.getElementById('clearGroupBtn');
+    const groupListContainer = document.getElementById('groupListContainer');
+    const totalTorchesGroupSpan = document.getElementById('totalTorchesGroup');
+    const totalOilGroupSpan = document.getElementById('totalOilGroup');
+    const groupCountSpan = document.getElementById('groupCount');
+    
+    function updateSelectedDisplay() {
+        const struct = structures.find(s => s.id === selectedStructureId);
+        if (struct) {
+            selectedNameSpan.innerText = struct.name;
+            selectedHpSpan.innerText = `❤️ Hitpoints: ${struct.hp}`;
+            const torchRange = getTorchRange(struct.hp);
+            const oilRange = getOilRange(struct.hp);
+            torchReqDisplay.innerHTML = `<img src="Icons/IconTorch.png" onerror="this.style.display='none'"> Torches: ${formatRange(torchRange)}`;
+            oilReqDisplay.innerHTML = `<img src="Icons/IconOilFlask.png" onerror="this.style.display='none'"> Oil Flasks: ${formatRange(oilRange)}`;
+            selectedIconPreview.src = getIconForStructure(struct.name);
+            selectedIconPreview.onerror = () => { selectedIconPreview.src = "Icons/IconWall.png"; };
+        } else {
+            selectedNameSpan.innerText = "—";
+            selectedHpSpan.innerText = "HP: —";
+            torchReqDisplay.innerHTML = `<img src="Icons/IconTorch.png" onerror="this.style.display='none'"> Torches: —`;
+            oilReqDisplay.innerHTML = `<img src="Icons/IconOilFlask.png" onerror="this.style.display='none'"> Oil Flasks: —`;
+            selectedIconPreview.src = "Icons/IconTorch.png";
+        }
+    }
+    
+    function renderStructureList() {
+        const query = searchInput.value.trim().toLowerCase();
+        let filtered = structures;
+        if (query) {
+            filtered = structures.filter(s => s.name.toLowerCase().includes(query));
+        }
+        if (filtered.length === 0) {
+            listContainer.innerHTML = `<div style="padding: 1.5rem; text-align:center; color:#a3b3ce;">🔎 No structures match "${escapeHtml(query)}"</div>`;
+            return;
+        }
+        listContainer.innerHTML = filtered.map(struct => {
+            const isSelected = (selectedStructureId === struct.id);
+            let displayName = struct.name;
+            if (query) {
+                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                displayName = struct.name.replace(regex, match => `<span class="search-highlight">${match}</span>`);
+            }
+            return `
+                <div class="structure-item ${isSelected ? 'selected' : ''}" data-id="${struct.id}">
+                    <div class="structure-icon">
+                        <img src="${getIconForStructure(struct.name)}" onerror="this.src='Icons/IconWall.png'" alt="icon">
+                    </div>
+                    <div class="structure-info">
+                        <div class="structure-name">${displayName}</div>
+                        <div class="structure-hp">❤️ HP: ${struct.hp}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        document.querySelectorAll('.structure-item').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const id = el.getAttribute('data-id');
+                if (id) {
+                    selectedStructureId = id;
+                    updateSelectedDisplay();
+                    renderStructureList();
+                }
+                e.stopPropagation();
+            });
+        });
+    }
+    
+    // Update group panel: totals appear UNDER the list
+    function updateGroupUI() {
+        groupCountSpan.innerText = raidGroup.length;
+        if (raidGroup.length === 0) {
+            groupListContainer.innerHTML = `<div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ Group is empty. Add structures.</div>`;
+            totalTorchesGroupSpan.innerText = "0";
+            totalOilGroupSpan.innerText = "0";
+            return;
+        }
+        
+        let totalTorchMin = 0, totalTorchMax = 0;
+        let totalOilMin = 0, totalOilMax = 0;
+        
+        const groupHtml = raidGroup.map((item, idx) => {
+            const tRange = getTorchRange(item.hp);
+            const oRange = getOilRange(item.hp);
+            totalTorchMin += tRange.min;
+            totalTorchMax += tRange.max;
+            totalOilMin += oRange.min;
+            totalOilMax += oRange.max;
+            const torchStr = (tRange.min === tRange.max) ? `${tRange.min}` : `${tRange.min}–${tRange.max}`;
+            const oilStr = (oRange.min === oRange.max) ? `${oRange.min}` : `${oRange.min}–${oRange.max}`;
+            return `
+                <div class="group-item">
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <img src="${getIconForStructure(item.name)}" width="24" height="24" style="background:#1e2937; border-radius:6px;" onerror="this.src='Icons/IconWall.png'">
+                        <span><strong>${escapeHtml(item.name)}</strong> (${item.hp} hp)</span>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span style="font-size:0.7rem;"><img src="Icons/IconTorch.png" style="width:14px;height:14px;"> ${torchStr}  <img src="Icons/IconOilFlask.png" style="width:14px;height:14px; margin-left:6px;"> ${oilStr}</span>
+                        <button class="remove-group-item" data-index="${idx}">✖</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        groupListContainer.innerHTML = groupHtml;
+        
+        const torchDisplay = (totalTorchMin === totalTorchMax) ? `${totalTorchMin}` : `${totalTorchMin}–${totalTorchMax}`;
+        const oilDisplay = (totalOilMin === totalOilMax) ? `${totalOilMin}` : `${totalOilMin}–${totalOilMax}`;
+        
+        totalTorchesGroupSpan.innerHTML = torchDisplay;
+        totalOilGroupSpan.innerHTML = oilDisplay;
+        
+        document.querySelectorAll('.remove-group-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.getAttribute('data-index'), 10);
+                if (!isNaN(idx)) {
+                    raidGroup.splice(idx, 1);
+                    updateGroupUI();
+                }
+                e.stopPropagation();
+            });
+        });
+    }
+    
+    function addSelectedToGroup() {
+        if (!selectedStructureId) {
+            alert("Please select a structure first.");
+            return;
+        }
+        const struct = structures.find(s => s.id === selectedStructureId);
+        if (struct) {
+            raidGroup.push({ 
+                id: struct.id + "_" + Date.now() + "_" + Math.random(), 
+                name: struct.name, 
+                hp: struct.hp 
+            });
+            updateGroupUI();
+        } else {
+            alert("Structure not found");
+        }
+    }
+    
+    function clearGroup() {
+        raidGroup = [];
+        updateGroupUI();
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function initialize() {
+        renderStructureList();
+        if (structures.length > 0) {
+            selectedStructureId = structures[0].id;
+            updateSelectedDisplay();
+        }
+        addToGroupBtn.addEventListener('click', addSelectedToGroup);
+        clearGroupBtn.addEventListener('click', clearGroup);
+        searchInput.addEventListener('input', () => {
+            renderStructureList();
+        });
+        updateGroupUI();
+    }
+    
+    initialize();
+</script>
+</body>
+</html>
