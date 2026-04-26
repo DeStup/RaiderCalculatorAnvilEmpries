@@ -1,60 +1,60 @@
 Updated:25/04/2026
-#object: hp,type
+#object: hp,type,reinforcement
 #Structure
-Keystone T1: 300,family
-Keystone T2: 500,family
-Keystone T3: 800,family
-Homestead Square Wall T1: 100,family
-Homestead Square Wall T2: 150,family
-Homestead Square Bedrock T1: 125,family
-Homestead Square Bedrock T2: 250,family
-Makeshift Wall T1: 60,defense 
-Makeshift Wall T2: 300,defense 
-Makeshift Wall T3: 720,defense 
-Large Camp: 500,camp
-Camp Palisade: 38,camp
-Stockade: 50,defense
-Small Camp: 25,camp
-Tent: 25,camp
-Beacon Tower: 100,general
-Fortress Keep T1: 512,town/fortress
-Fortress Keep T2: 2048,town/fortress
-Fortress Keep T3: 2880,town/fortress
-Town Center: 2880,town/fortress
-Kepp/Town Wall T2: 800,town/fortress
-Kepp/Town Wall T3: 2160,town/fortress
-Keep Half Width Foundation T2: 200,town/fortress
-Keep Half Width Foundation T3: 500,town/fortress
-Keep Triangular Foundation T2: 400,town/fortress
-Keep Triangular Foundation T3: 600,town/fortress
-Siege Tower: 2875,vehicle
-Heavy Battering Ram: 800,vehicle
-Battering Ram: 460,vehicle
-Catapult: 315,vehicle
-Keep Door Hold Wall T2: 150,town/fortress
-Keep Door Hold Wall T3: 300,town/fortress
-Homestead Door Wall T2: 150,family
-Homestead Door Wall T3: 300,family
-Temple: 720,general
-Resource Stockpile T1: 160,family
-Resource Stockpile T2: 360,family
-Resource Stockpile T3: 840,family
-Homestead Bridge Walkway: 300,family
-Homestead Corridor T1: 150,family
-Homestead Corridor T2: 300,family
-Caravan: 128,vehicle
-Resource Wagon: 200,vehicle
-Small Boat: 200,vehicle
-Hand Cart: 80,vehicle
-Scorpion: 50,vehicle
-Siege Ladder: 200,vehicle
-Drying Rack: 100,family
-Hen House T2: 150,family
-Hen House T3: 300,family
-Stable: 100,family
-Tilled Field: 180,family
-Shallow Well T2: 90,family
-Shallow Well T3: 210,family
+Keystone T1: 300,family,notReinforceable
+Keystone T2: 500,family,notReinforceable
+Keystone T3: 800,family,notReinforceable
+Homestead Square Wall T1: 100,family,notReinforceable
+Homestead Square Wall T2: 150,family,notReinforceable
+Homestead Square Bedrock T1: 125,family,notReinforceable
+Homestead Square Bedrock T2: 250,family,notReinforceable
+Makeshift Wall T1: 60,defense,notReinforceable
+Makeshift Wall T2: 300,defense,notReinforceable
+Makeshift Wall T3: 720,defense,notReinforceable
+Large Camp: 500,camp,notReinforceable
+Camp Palisade: 38,camp,notReinforceable
+Stockade: 50,defense,notReinforceable
+Small Camp: 25,camp,notReinforceable
+Tent: 25,camp,notReinforceable
+Beacon Tower: 100,general,notReinforceable
+Fortress Keep T1: 512,town/fortress,notReinforceable
+Fortress Keep T2: 2048,town/fortress,notReinforceable
+Fortress Keep T3: 2880,town/fortress,notReinforceable
+Town Center: 2880,town/fortress,notReinforceable
+Kepp/Town Wall T2: 800,town/fortress,reinforceable
+Kepp/Town Wall T3: 2160,town/fortress,reinforceable
+Keep Half Width Foundation T2: 200,town/fortress,reinforceable
+Keep Half Width Foundation T3: 500,town/fortress,reinforceable
+Keep Triangular Foundation T2: 400,town/fortress,reinforceable
+Keep Triangular Foundation T3: 600,town/fortress,reinforceable
+Siege Tower: 2875,vehicle,notReinforceable
+Heavy Battering Ram: 800,vehicle,notReinforceable
+Battering Ram: 460,vehicle,notReinforceable
+Catapult: 315,vehicle,notReinforceable
+Keep Door Hold Wall T2: 150,town/fortress,reinforceable
+Keep Door Hold Wall T3: 300,town/fortress,reinforceable
+Homestead Door Wall T2: 150,family,notReinforceable
+Homestead Door Wall T3: 300,family,notReinforceable
+Temple: 720,general,notReinforceable
+Resource Stockpile T1: 160,family,notReinforceable
+Resource Stockpile T2: 360,family,notReinforceable
+Resource Stockpile T3: 840,family,notReinforceable
+Homestead Bridge Walkway: 300,family,notReinforceable
+Homestead Corridor T1: 150,family,notReinforceable
+Homestead Corridor T2: 300,family,notReinforceable
+Caravan: 128,vehicle,notReinforceable
+Resource Wagon: 200,vehicle,notReinforceable
+Small Boat: 200,vehicle,notReinforceable
+Hand Cart: 80,vehicle,notReinforceable
+Scorpion: 50,vehicle,notReinforceable
+Siege Ladder: 200,vehicle,notReinforceable
+Drying Rack: 100,family,notReinforceable
+Hen House T2: 150,family,notReinforceable
+Hen House T3: 300,family,notReinforceable
+Stable: 100,family,notReinforceable
+Tilled Field: 180,family,notReinforceable
+Shallow Well T2: 90,family,notReinforceable
+Shallow Well T3: 210,family,notReinforceable
 
 
 

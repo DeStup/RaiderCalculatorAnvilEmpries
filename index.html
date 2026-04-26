@@ -313,6 +313,14 @@
             background: #0a0f17;
             border-radius: 24px;
             padding: 0.9rem 1rem;
+            position: relative;
+        }
+
+        .selected-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
 
         .selected-name {
@@ -322,6 +330,45 @@
             align-items: center;
             gap: 0.5rem;
             flex-wrap: wrap;
+        }
+
+        .reinforce-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(30, 40, 50, 0.6);
+            padding: 4px 10px;
+            border-radius: 20px;
+            opacity: 0.7;
+        }
+
+        .reinforce-checkbox:hover {
+            opacity: 1;
+        }
+
+        .reinforce-checkbox input {
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+            accent-color: #b87c2e;
+        }
+
+        .reinforce-checkbox label {
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: #8f9bb3;
+            letter-spacing: 0.3px;
+        }
+
+        .reinforced-badge {
+            background: #4a3a2a;
+            color: #c9aa6a;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: normal;
+            opacity: 0.8;
         }
 
         .req-list {
@@ -419,6 +466,10 @@
 
         .group-item-name {
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
         .group-item-damage {
@@ -573,10 +624,16 @@
             </div>
 
             <div class="selected-struct" id="selectedPreviewArea">
-                <div class="selected-name">
-                    <img id="selectedIconPreview" src="Icons/IconTorch.png" width="28" height="28" style="background:#1e2a3a; border-radius:8px; padding:2px;">
-                    <span id="selectedStructureName">—</span>
-                    <span id="selectedTypeBadge" class="type-badge"></span>
+                <div class="selected-header">
+                    <div class="selected-name">
+                        <img id="selectedIconPreview" src="Icons/IconTorch.png" width="28" height="28" style="background:#1e2a3a; border-radius:8px; padding:2px;">
+                        <span id="selectedStructureName">—</span>
+                        <span id="selectedTypeBadge" class="type-badge"></span>
+                    </div>
+                    <div id="reinforceContainer" class="reinforce-checkbox" style="display: none;">
+                        <input type="checkbox" id="reinforceCheckbox">
+                        <label for="reinforceCheckbox">reinforced</label>
+                    </div>
                 </div>
                 <div id="selectedHpDisplay" style="font-size:0.8rem; margin: 4px 0;">HP: —</div>
                 <div class="req-list" id="requiredItemsList"></div>
@@ -592,7 +649,7 @@
                     <button id="clearGroupBtn" class="btn clear-btn">🗑️ clear all</button>
                 </div>
                 <div id="groupListContainer" class="group-list">
-                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ list is empty. select an structure and click on a damage type, then press add.</div>
+                    <div style="padding: 0.8rem; text-align:center; color:#7f8fa4;">⚔️ list is empty. select a structure and click on a damage type, then press add.</div>
                 </div>
                 <div class="group-totals" id="groupTotalsFooter">
                     <div style="font-weight: bold; margin-bottom: 8px;">Total required</div>
@@ -617,6 +674,8 @@
     let selectedDamageTypeForAdd = null;
     let raidGroup = [];
     let activeFilters = new Set(["all"]);
+    let currentReinforced = false;
+    let currentSelectedObject = null;
     let csvUpdateDate = "--";
 
     const searchInput = document.getElementById('searchInput');
@@ -632,6 +691,8 @@
     const groupListContainer = document.getElementById('groupListContainer');
     const damageBreakdownDiv = document.getElementById('damageBreakdown');
     const groupCountSpan = document.getElementById('groupCount');
+    const reinforceContainer = document.getElementById('reinforceContainer');
+    const reinforceCheckbox = document.getElementById('reinforceCheckbox');
     const patchNoteDate = document.querySelector('.patch-note span:first-child');
 
     const filterAllBtn = document.getElementById('filterAllBtn');
@@ -642,7 +703,7 @@
     const filterGeneralBtn = document.getElementById('filterGeneralBtn');
     const filterVehicleBtn = document.getElementById('filterVehicleBtn');
 
-    // Все допустимые типы объектов для осадных орудий
+    // Все допустимые типы объектов
     const ALL_STRUCTURE_TYPES = ["family", "defense", "camp", "town", "general"];
 
     function parseCSV(csvText) {
@@ -682,7 +743,8 @@
                 const parts = rest.split(",");
                 const hp = parseInt(parts[0]);
                 let category = parts.length > 1 ? parts[1].trim() : "general";
-                // normalise category
+                let reinforceable = parts.length > 2 ? parts[2].trim() === "reinforceable" : false;
+
                 let normalizedCategory = category;
                 let displayType = category;
                 if (category === "town/fortress") {
@@ -695,6 +757,7 @@
                         hp: hp,
                         type: displayType,
                         category: normalizedCategory,
+                        reinforceable: reinforceable,
                         durability: "durable"
                     });
                 }
@@ -723,12 +786,12 @@
                     if (key === "batteringram") key = "batteringram";
                     if (key === "heavybatteringram") key = "heavyram";
 
-                    let allowedFor = [...ALL_STRUCTURE_TYPES, "vehicle"]; // torch and oil for all
+                    let allowedFor = [...ALL_STRUCTURE_TYPES, "vehicle"];
 
                     if (name === "Iron Broadax") {
                         allowedFor = ["vehicle"];
                     } else if (name === "Battering Ram" || name === "Heavy Battering Ram" || name === "Catapult") {
-                        allowedFor = [...ALL_STRUCTURE_TYPES]; // все типы построек, НЕ vehicle
+                        allowedFor = [...ALL_STRUCTURE_TYPES];
                     } else {
                         allowedFor = [...ALL_STRUCTURE_TYPES, "vehicle"];
                     }
@@ -776,6 +839,13 @@
                 damageStatsContainer.innerHTML = `<div class="error">⚠️ failed to load damage data.</div>`;
                 return false;
             });
+    }
+
+    function getEffectiveHp(obj, reinforced) {
+        if (reinforced && obj.reinforceable) {
+            return obj.hp * 5;
+        }
+        return obj.hp;
     }
 
     function getDamageRange(hp, damageTypeKey, objectType) {
@@ -852,17 +922,28 @@
     function updateSelectedDisplay() {
         const obj = objects.find(o => o.id === selectedObjectId);
         if (obj) {
+            currentSelectedObject = obj;
             selectedNameSpan.innerText = obj.name;
-            selectedHpSpan.innerText = `❤️ HP: ${obj.hp}`;
+            const effectiveHp = getEffectiveHp(obj, currentReinforced);
+            const reinforcedText = (currentReinforced && obj.reinforceable) ? ' (reinforced)' : '';
+            selectedHpSpan.innerText = `❤️ HP: ${effectiveHp}${reinforcedText}`;
             const displayType = obj.category === 'town' ? 'town/fortress' : obj.category;
             selectedTypeBadge.innerText = displayType;
             selectedTypeBadge.className = `type-badge ${obj.category === 'town' ? 'town-fortress' : obj.category}`;
+
+            if (obj.reinforceable) {
+                reinforceContainer.style.display = 'flex';
+            } else {
+                reinforceContainer.style.display = 'none';
+                currentReinforced = false;
+                reinforceCheckbox.checked = false;
+            }
 
             const available = getAvailableDamageTypes(obj.category);
             let html = "";
             for (let dmgKey of available) {
                 const dmg = damageTypes[dmgKey];
-                const range = getDamageRange(obj.hp, dmgKey, obj.category);
+                const range = getDamageRange(effectiveHp, dmgKey, obj.category);
                 const isSelected = (selectedDamageTypeForAdd === dmgKey);
                 html += `<div class="req-item ${isSelected ? 'selected-damage' : ''}" data-damage-type="${dmgKey}">
                             <img src="${dmg.icon}" onerror="this.style.display='none'"> ${dmg.name}: ${formatRange(range)}
@@ -878,6 +959,11 @@
                 });
             });
         }
+    }
+
+    function onReinforceChange() {
+        currentReinforced = reinforceCheckbox.checked;
+        updateSelectedDisplay();
     }
 
     function renderObjectList() {
@@ -907,6 +993,7 @@
                             <div class="structure-name">
                                 ${escapeHtml(obj.name)}
                                 <span class="type-badge ${typeClass}">${displayType}</span>
+                                ${obj.reinforceable ? '<span class="reinforced-badge">reinforceable</span>' : ''}
                             </div>
                             <div class="structure-hp">❤️ HP: ${obj.hp}</div>
                         </div>
@@ -916,6 +1003,8 @@
         document.querySelectorAll('.structure-item').forEach(el => {
             el.addEventListener('click', (e) => {
                 selectedObjectId = el.getAttribute('data-id');
+                currentReinforced = false;
+                if (reinforceCheckbox) reinforceCheckbox.checked = false;
                 const obj = objects.find(o => o.id === selectedObjectId);
                 if (obj) {
                     const available = getAvailableDamageTypes(obj.category);
@@ -953,7 +1042,12 @@
             const typeClass = item.category === 'town' ? 'town-fortress' : item.category;
             return `<div class="group-item">
                         <div class="group-item-info">
-                            <div class="group-item-name"><img src="${getIconForObject(item.name)}" width="20" height="20" style="vertical-align:middle; margin-right:6px;"> <strong>${escapeHtml(item.name)}</strong> <span class="type-badge ${typeClass}">${displayType}</span></div>
+                            <div class="group-item-name">
+                                <img src="${getIconForObject(item.name)}" width="20" height="20" style="vertical-align:middle; margin-right:6px;">
+                                <strong>${escapeHtml(item.name)}</strong>
+                                <span class="type-badge ${typeClass}">${displayType}</span>
+                                ${item.reinforced ? '<span class="reinforced-badge">reinforced</span>' : ''}
+                            </div>
                             <div class="group-item-damage"><img src="${dmg.icon}" style="width:14px;height:14px;"> ${dmg.name}: ${rangeStr}${hitsWord}</div>
                         </div>
                         <button class="remove-group-item" data-index="${idx}">✖</button>
@@ -992,14 +1086,18 @@
             alert(`${damageTypes[selectedDamageTypeForAdd]?.name} cannot damage ${obj.type}s!`);
             return;
         }
-        const range = getDamageRange(obj.hp, selectedDamageTypeForAdd, obj.category);
+        const effectiveHp = getEffectiveHp(obj, currentReinforced);
+        const range = getDamageRange(effectiveHp, selectedDamageTypeForAdd, obj.category);
         raidGroup.push({
             id: Date.now() + Math.random(),
             name: obj.name,
             hp: obj.hp,
+            effectiveHp: effectiveHp,
             type: obj.type,
             category: obj.category,
             durability: obj.durability,
+            reinforceable: obj.reinforceable,
+            reinforced: currentReinforced && obj.reinforceable,
             damageType: selectedDamageTypeForAdd,
             hitsMin: range.min,
             hitsMax: range.max
@@ -1078,10 +1176,11 @@
             if (available.length) selectedDamageTypeForAdd = available[0];
             updateSelectedDisplay();
         }
-        
+
         addToGroupBtn.onclick = addSelectedToGroup;
         clearGroupBtn.onclick = clearGroup;
         searchInput.oninput = () => renderObjectList();
+        reinforceCheckbox.onchange = onReinforceChange;
         
         filterAllBtn.onclick = () => toggleFilter("all");
         filterFamilyBtn.onclick = () => toggleFilter("family");
